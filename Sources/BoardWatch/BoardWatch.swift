@@ -2,12 +2,43 @@ import SwiftUI
 import AppKit
 
 extension NSImage {
-    static var redStatusDot: NSImage {
-        let size = NSSize(width: 7, height: 7)
+    static func statusIcon(named symbolName: String, hasNew: Bool) -> NSImage {
+        if !hasNew {
+            let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .medium)
+            let img = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)?.withSymbolConfiguration(config)
+            img?.isTemplate = true
+            return img ?? NSImage()
+        }
+
+        let size = NSSize(width: 18, height: 18)
         let img = NSImage(size: size, flipped: false) { _ in
+            guard let ctx = NSGraphicsContext.current?.cgContext else { return false }
+
+            let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .medium)
+                .applying(.init(paletteColors: [NSColor.labelColor]))
+            if let base = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)?.withSymbolConfiguration(config) {
+                let symbolSize = base.size
+                let originX = (size.width - symbolSize.width) / 2
+                let originY = (size.height - symbolSize.height) / 2
+                base.draw(in: NSRect(x: originX, y: originY, width: symbolSize.width, height: symbolSize.height))
+            }
+
+            // Bottom-right notification dot with clean background cutout
+            let dotDiameter: CGFloat = 5.0
+            let dotX = size.width - dotDiameter - 0.5
+            let dotY: CGFloat = 1.0
+            let dotRect = NSRect(x: dotX, y: dotY, width: dotDiameter, height: dotDiameter)
+            let cutoutRect = dotRect.insetBy(dx: -1.0, dy: -1.0)
+
+            ctx.saveGState()
+            ctx.setBlendMode(.destinationOut)
+            NSColor.black.setFill()
+            NSBezierPath(ovalIn: cutoutRect).fill()
+            ctx.restoreGState()
+
             NSColor.systemRed.setFill()
-            let path = NSBezierPath(ovalIn: NSRect(x: 0, y: 0, width: 7, height: 7))
-            path.fill()
+            NSBezierPath(ovalIn: dotRect).fill()
+
             return true
         }
         img.isTemplate = false
@@ -24,15 +55,8 @@ struct BoardWatchApp: App {
             MenuBarContentView(appState: appState)
         } label: {
             HStack(spacing: 3) {
-                ZStack(alignment: .topTrailing) {
-                    Image(systemName: appState.statusIconName)
-                        .font(.system(size: 14))
-
-                    if appState.hasNewTasks {
-                        Image(nsImage: .redStatusDot)
-                            .offset(x: 4, y: -3)
-                    }
-                }
+                Image(nsImage: .statusIcon(named: appState.statusIconName, hasNew: appState.hasNewTasks))
+                    .id("\(appState.statusIconName)-\(appState.hasNewTasks)")
 
                 if let badgeText = appState.menuBarBadgeText {
                     Text(badgeText)
