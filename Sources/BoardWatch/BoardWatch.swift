@@ -23,10 +23,10 @@ extension NSImage {
                 base.draw(in: NSRect(x: 0, y: originY, width: symbolWidth, height: symbolHeight))
             }
 
-            // Bottom-right notification dot raised flush with baseline
+            // Top-right corner notification dot (standard macOS badge style)
             let dotDiameter: CGFloat = 4.2
-            let dotX: CGFloat = symbolName.contains("circle") ? 12.0 : 12.5
-            let dotY: CGFloat = symbolName.contains("circle") ? 2.0 : 2.4
+            let dotX: CGFloat = symbolName.contains("circle") ? 12.0 : 12.8
+            let dotY: CGFloat = 11.5
             let dotRect = NSRect(x: dotX, y: dotY, width: dotDiameter, height: dotDiameter)
             let cutoutRect = dotRect.insetBy(dx: -0.7, dy: -0.7)
 
