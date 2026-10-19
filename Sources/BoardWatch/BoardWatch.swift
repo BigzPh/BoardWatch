@@ -70,13 +70,26 @@ struct MenuBarContentView: View {
 
                 ForEach(groups) { group in
                     Section("\(group.workspaceName) › \(group.boardName)") {
-                        ForEach(group.cards) { card in
+                        let limit = 10
+                        ForEach(group.cards.prefix(limit)) { card in
                             Button(action: {
                                 if let urlString = card.url, let url = URL(string: urlString) {
                                     NSWorkspace.shared.open(url)
                                 }
                             }) {
                                 Text(formatCardMenuItem(card))
+                            }
+                        }
+
+                        if group.cards.count > limit {
+                            let remaining = group.cards.count - limit
+                            Button(action: {
+                                let boardUrl = "https://trello.com/b/\(group.boardId ?? "")"
+                                if let url = URL(string: boardUrl) {
+                                    NSWorkspace.shared.open(url)
+                                }
+                            }) {
+                                Text("View \(remaining) more in Trello...")
                             }
                         }
                     }

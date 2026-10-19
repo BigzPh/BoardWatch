@@ -5,6 +5,7 @@ public struct CardBoardGroup: Identifiable {
     public var id: String { "\(workspaceName) • \(boardName)" }
     public let workspaceName: String
     public let boardName: String
+    public let boardId: String?
     public let cards: [TrelloCard]
 }
 
@@ -82,6 +83,7 @@ public final class AppState {
             return CardBoardGroup(
                 workspaceName: first?.workspaceName ?? "Personal",
                 boardName: first?.boardName ?? "Board",
+                boardId: first?.idBoard,
                 cards: cards
             )
         }.sorted { $0.id < $1.id }
