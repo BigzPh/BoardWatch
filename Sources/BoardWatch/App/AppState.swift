@@ -99,6 +99,27 @@ public final class AppState {
         pendingCards.filter { $0.dueStatus == .overdue || $0.dueStatus == .dueToday }.count
     }
 
+    public func isCardNew(_ cardId: String) -> Bool {
+        !settings.readCardIDs.contains(cardId)
+    }
+
+    public var newCardsCount: Int {
+        pendingCards.filter { isCardNew($0.id) }.count
+    }
+
+    public var hasNewTasks: Bool {
+        newCardsCount > 0
+    }
+
+    public func markCardAsRead(_ cardId: String) {
+        settings.markCardAsRead(cardId)
+    }
+
+    public func markAllAsRead() {
+        let ids = pendingCards.map { $0.id }
+        settings.markAllAsRead(ids)
+    }
+
     public var menuBarBadgeText: String? {
         guard settings.isConfigured else { return "!" }
         let count = pendingCards.count

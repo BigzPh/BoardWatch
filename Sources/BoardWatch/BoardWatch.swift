@@ -11,6 +11,14 @@ struct BoardWatchApp: App {
         } label: {
             HStack(spacing: 3) {
                 Image(systemName: appState.statusIconName)
+
+                if appState.hasNewTasks {
+                    Image(systemName: "circle.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Color.red)
+                        .font(.system(size: 6))
+                }
+
                 if let badgeText = appState.menuBarBadgeText {
                     Text(badgeText)
                         .font(.system(size: 11, weight: .bold, design: .rounded))
@@ -33,6 +41,15 @@ struct MenuBarContentView: View {
         } else {
             if let user = appState.currentUser {
                 Text("Assigned to @\(user.username)")
+            }
+
+            // Unread / New Indicator Banner
+            if appState.hasNewTasks {
+                Button(action: {
+                    appState.markAllAsRead()
+                }) {
+                    Text("Mark \(appState.newCardsCount) new as read")
+                }
             }
 
             // Workspace Filter Dropdown
@@ -73,11 +90,15 @@ struct MenuBarContentView: View {
                         let limit = 10
                         ForEach(group.cards.prefix(limit)) { card in
                             Button(action: {
+                                appState.markCardAsRead(card.id)
                                 if let urlString = card.url, let url = URL(string: urlString) {
                                     NSWorkspace.shared.open(url)
                                 }
                             }) {
-                                Label(formatCardMenuItem(card), systemImage: cardIcon(card))
+                                Label(
+                                    formatCardMenuItem(card, isNew: appState.isCardNew(card.id)),
+                                    systemImage: cardIcon(card, isNew: appState.isCardNew(card.id))
+                                )
                             }
                         }
 
@@ -123,28 +144,28 @@ struct MenuBarContentView: View {
         }
     }
 
-    private func cardIcon(_ card: TrelloCard) -> String {
+    private func cardIcon(_ card: TrelloCard, isNew: Bool) -> String {
         switch card.dueStatus {
         case .overdue:
             return "exclamationmark.circle.fill"
         case .dueToday:
             return "clock.fill"
         default:
-            return "pin.fill"
+            return isNew ? "sparkles" : "pin.fill"
         }
     }
 
-    private func formatCardMenuItem(_ card: TrelloCard) -> String {
-        var prefix = ""
+    private func formatCardMenuItem(_ card: TrelloCard, isNew: Bool) -> String {
+        var prefix = isNew ? "[New] " : ""
         switch card.dueStatus {
         case .overdue:
-            prefix = "[Overdue] "
+            prefix += "[Overdue] "
         case .dueToday:
-            prefix = "[Due Today] "
+            prefix += "[Due Today] "
         case .dueTomorrow:
-            prefix = "[Tomorrow] "
+            prefix += "[Tomorrow] "
         default:
-            prefix = ""
+            break
         }
 
         var suffix = ""

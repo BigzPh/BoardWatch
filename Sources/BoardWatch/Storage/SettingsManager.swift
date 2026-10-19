@@ -40,6 +40,13 @@ public final class SettingsManager: @unchecked Sendable {
     private let kHideCompleted = "trello_hide_completed"
     private let kBadgeMode = "trello_badge_mode"
     private let kWorkspaceFilter = "trello_workspace_filter"
+    private let kReadCardIDs = "boardwatch_read_card_ids"
+
+    public var readCardIDs: Set<String> {
+        didSet {
+            defaults.set(Array(readCardIDs), forKey: kReadCardIDs)
+        }
+    }
 
     public var selectedWorkspaceFilter: String? {
         didSet {
@@ -105,6 +112,17 @@ public final class SettingsManager: @unchecked Sendable {
         }
 
         self.selectedWorkspaceFilter = defaults.string(forKey: kWorkspaceFilter)
+
+        let savedRead = defaults.stringArray(forKey: kReadCardIDs) ?? []
+        self.readCardIDs = Set(savedRead)
+    }
+
+    public func markCardAsRead(_ cardId: String) {
+        readCardIDs.insert(cardId)
+    }
+
+    public func markAllAsRead(_ cardIds: [String]) {
+        readCardIDs.formUnion(cardIds)
     }
 
     public var isConfigured: Bool {
