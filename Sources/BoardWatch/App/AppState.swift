@@ -16,6 +16,7 @@ public final class AppState {
 
     public var cards: [TrelloCard] = []
     public var boards: [TrelloBoard] = []
+    public var organizations: [TrelloOrganization] = []
     public var currentUser: TrelloMember?
     public var isLoading: Bool = false
     public var errorMessage: String?
@@ -41,14 +42,34 @@ public final class AppState {
         }
     }
 
-    public var pendingCards: [TrelloCard] {
-        cards
-            .filter { !$0.isComplete }
-            .sorted { a, b in
-                guard let dateA = a.dueDate else { return false }
-                guard let dateB = b.dueDate else { return true }
-                return dateA < dateB
+    public var availableWorkspaces: [String] {
+        var set = Set(organizations.map { $0.displayName })
+        for card in cards {
+            if let ws = card.workspaceName {
+                set.insert(ws)
             }
+        }
+        return Array(set).sorted()
+    }
+
+    public var currentWorkspaceFilterName: String {
+        settings.selectedWorkspaceFilter ?? "All Workspaces"
+    }
+
+    public var pendingCards: [TrelloCard] {
+        let incomplete = cards.filter { !$0.isComplete }
+        let filtered: [TrelloCard]
+        if let filter = settings.selectedWorkspaceFilter, !filter.isEmpty {
+            filtered = incomplete.filter { $0.workspaceName == filter }
+        } else {
+            filtered = incomplete
+        }
+
+        return filtered.sorted { a, b in
+            guard let dateA = a.dueDate else { return false }
+            guard let dateB = b.dueDate else { return true }
+            return dateA < dateB
+        }
     }
 
     public var groupedPendingCards: [CardBoardGroup] {
@@ -103,6 +124,7 @@ public final class AppState {
 
             let (user, orgs, boards, assignedCards) = try await (userFetch, orgsFetch, boardsFetch, cardsFetch)
             self.currentUser = user
+            self.organizations = orgs
             self.boards = boards
 
             // Build lookup dictionaries

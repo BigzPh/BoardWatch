@@ -35,10 +35,36 @@ struct MenuBarContentView: View {
                 Text("Assigned to @\(user.username)")
             }
 
+            // Workspace Filter Dropdown
+            Menu("Workspace: \(appState.currentWorkspaceFilterName)") {
+                Button(action: {
+                    appState.settings.selectedWorkspaceFilter = nil
+                }) {
+                    let isSelected = appState.settings.selectedWorkspaceFilter == nil
+                    let count = appState.cards.filter { !$0.isComplete }.count
+                    Text("\(isSelected ? "✓ " : "  ")All Workspaces (\(count))")
+                }
+
+                if !appState.availableWorkspaces.isEmpty {
+                    Divider()
+
+                    ForEach(appState.availableWorkspaces, id: \.self) { ws in
+                        let isSelected = appState.settings.selectedWorkspaceFilter == ws
+                        let count = appState.cards.filter { !$0.isComplete && $0.workspaceName == ws }.count
+                        Button(action: {
+                            appState.settings.selectedWorkspaceFilter = ws
+                        }) {
+                            Text("\(isSelected ? "✓ " : "  ")\(ws) (\(count))")
+                        }
+                    }
+                }
+            }
+
             let groups = appState.groupedPendingCards
 
             if groups.isEmpty {
-                Text("No pending cards")
+                Divider()
+                Text("No pending cards in \(appState.currentWorkspaceFilterName)")
             } else {
                 Divider()
 

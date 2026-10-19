@@ -39,6 +39,17 @@ public final class SettingsManager: @unchecked Sendable {
     private let kRefreshInterval = "trello_refresh_interval"
     private let kHideCompleted = "trello_hide_completed"
     private let kBadgeMode = "trello_badge_mode"
+    private let kWorkspaceFilter = "trello_workspace_filter"
+
+    public var selectedWorkspaceFilter: String? {
+        didSet {
+            if let filter = selectedWorkspaceFilter {
+                defaults.set(filter, forKey: kWorkspaceFilter)
+            } else {
+                defaults.removeObject(forKey: kWorkspaceFilter)
+            }
+        }
+    }
 
     public var apiKey: String {
         didSet { defaults.set(apiKey, forKey: kApiKey) }
@@ -92,6 +103,8 @@ public final class SettingsManager: @unchecked Sendable {
         } else {
             self.badgeDisplayMode = .trackedOnly
         }
+
+        self.selectedWorkspaceFilter = defaults.string(forKey: kWorkspaceFilter)
     }
 
     public var isConfigured: Bool {
