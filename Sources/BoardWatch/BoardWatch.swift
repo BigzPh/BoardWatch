@@ -10,23 +10,23 @@ extension NSImage {
             return img ?? NSImage()
         }
 
-        let size = NSSize(width: 18, height: 18)
+        let size = NSSize(width: 20, height: 18)
         let img = NSImage(size: size, flipped: false) { _ in
             guard let ctx = NSGraphicsContext.current?.cgContext else { return false }
 
             let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .medium)
                 .applying(.init(paletteColors: [NSColor.labelColor]))
             if let base = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)?.withSymbolConfiguration(config) {
-                let symbolSize = base.size
-                let originX = (size.width - symbolSize.width) / 2
-                let originY = (size.height - symbolSize.height) / 2
-                base.draw(in: NSRect(x: originX, y: originY, width: symbolSize.width, height: symbolSize.height))
+                let symbolWidth: CGFloat = symbolName.contains("circle") ? 16 : 17
+                let symbolHeight: CGFloat = symbolName.contains("circle") ? 16 : 15
+                let originY: CGFloat = (size.height - symbolHeight) / 2
+                base.draw(in: NSRect(x: 0, y: originY, width: symbolWidth, height: symbolHeight))
             }
 
-            // Bottom-right notification dot with clean background cutout
+            // Outer bottom-right corner notification dot with clean background cutout
             let dotDiameter: CGFloat = 5.0
-            let dotX = size.width - dotDiameter - 0.5
-            let dotY: CGFloat = 1.0
+            let dotX: CGFloat = 14.5
+            let dotY: CGFloat = 0.5
             let dotRect = NSRect(x: dotX, y: dotY, width: dotDiameter, height: dotDiameter)
             let cutoutRect = dotRect.insetBy(dx: -1.0, dy: -1.0)
 
