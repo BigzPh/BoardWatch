@@ -1,6 +1,20 @@
 import SwiftUI
 import AppKit
 
+extension NSImage {
+    static var redStatusDot: NSImage {
+        let size = NSSize(width: 9, height: 9)
+        let img = NSImage(size: size, flipped: false) { _ in
+            NSColor.systemRed.setFill()
+            let path = NSBezierPath(ovalIn: NSRect(x: 1, y: 1, width: 7, height: 7))
+            path.fill()
+            return true
+        }
+        img.isTemplate = false
+        return img
+    }
+}
+
 @main
 struct BoardWatchApp: App {
     @State private var appState = AppState()
@@ -9,15 +23,12 @@ struct BoardWatchApp: App {
         MenuBarExtra {
             MenuBarContentView(appState: appState)
         } label: {
-            HStack(spacing: 3) {
-                Image(systemName: appState.statusIconName)
-
+            HStack(spacing: 4) {
                 if appState.hasNewTasks {
-                    Image(systemName: "circle.fill")
-                        .symbolRenderingMode(.palette)
-                        .foregroundStyle(Color.red)
-                        .font(.system(size: 6))
+                    Image(nsImage: .redStatusDot)
                 }
+
+                Image(systemName: appState.statusIconName)
 
                 if let badgeText = appState.menuBarBadgeText {
                     Text(badgeText)
