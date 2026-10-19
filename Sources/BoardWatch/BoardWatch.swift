@@ -77,7 +77,7 @@ struct MenuBarContentView: View {
                                     NSWorkspace.shared.open(url)
                                 }
                             }) {
-                                Text(formatCardMenuItem(card))
+                                Label(formatCardMenuItem(card), systemImage: cardIcon(card))
                             }
                         }
 
@@ -120,6 +120,17 @@ struct MenuBarContentView: View {
 
         Button("Quit BoardWatch") {
             NSApplication.shared.terminate(nil)
+        }
+    }
+
+    private func cardIcon(_ card: TrelloCard) -> String {
+        switch card.dueStatus {
+        case .overdue:
+            return "exclamationmark.circle.fill"
+        case .dueToday:
+            return "clock.fill"
+        default:
+            return "pin.fill"
         }
     }
 
