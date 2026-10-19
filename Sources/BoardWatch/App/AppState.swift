@@ -31,6 +31,12 @@ public final class AppState {
 
         NotificationManager.shared.requestAuthorization()
         setupTimer()
+
+        if settings.isConfigured {
+            Task {
+                await refresh()
+            }
+        }
     }
 
     public func setupTimer() {
