@@ -28,6 +28,11 @@ chmod +x "${MACOS_DIR}/${APP_NAME}"
 # Copy Info.plist
 cp "${PROJECT_DIR}/Info.plist" "${CONTENTS_DIR}/Info.plist"
 
+# Copy AppIcon.icns
+if [[ -f "${PROJECT_DIR}/Resources/AppIcon.icns" ]]; then
+    cp "${PROJECT_DIR}/Resources/AppIcon.icns" "${RESOURCES_DIR}/AppIcon.icns"
+fi
+
 # Code sign ad-hoc so macOS allows running without Gatekeeper warnings
 echo "🔏 Code-signing application bundle..."
 codesign --force --deep --sign - "${APP_BUNDLE}"

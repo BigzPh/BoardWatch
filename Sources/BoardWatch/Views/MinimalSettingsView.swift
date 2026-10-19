@@ -13,10 +13,17 @@ struct MinimalSettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Header
-            HStack {
-                Image(systemName: "checklist")
-                    .font(.system(size: 20))
-                    .foregroundColor(.accentColor)
+            HStack(spacing: 12) {
+                if let appIcon = NSApp.applicationIconImage {
+                    Image(nsImage: appIcon)
+                        .resizable()
+                        .frame(width: 36, height: 36)
+                        .cornerRadius(8)
+                } else {
+                    Image(systemName: "checklist")
+                        .font(.system(size: 20))
+                        .foregroundColor(.accentColor)
+                }
                 VStack(alignment: .leading) {
                     Text("BoardWatch Settings")
                         .font(.headline)
