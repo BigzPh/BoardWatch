@@ -40,7 +40,7 @@ public final class NotificationManager: @unchecked Sendable {
                 seenIDs.insert(card.id)
                 sendNotification(
                     id: "new-\(card.id)",
-                    title: "📋 New Task Assigned",
+                    title: "New Task Assigned",
                     subtitle: card.board?.name ?? "Trello",
                     body: card.name
                 )
@@ -64,7 +64,7 @@ public final class NotificationManager: @unchecked Sendable {
 
                 sendNotification(
                     id: "due-summary-\(todayString)",
-                    title: "⚠️ \(count) Task\(count == 1 ? "" : "s") Due",
+                    title: "\(count) Task\(count == 1 ? "" : "s") Due",
                     subtitle: "Overdue or due today",
                     body: body
                 )

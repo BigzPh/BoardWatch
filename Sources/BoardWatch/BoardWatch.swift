@@ -26,7 +26,7 @@ struct MenuBarContentView: View {
 
     var body: some View {
         if !appState.settings.isConfigured {
-            Button("⚠️ Connect Trello Account...") {
+            Button("Connect Trello Account...") {
                 SettingsWindowController.shared.showSettings(appState: appState)
             }
             Divider()
@@ -38,7 +38,7 @@ struct MenuBarContentView: View {
             let pending = appState.pendingCards
 
             if pending.isEmpty {
-                Text("🎉 All caught up! No pending cards")
+                Text("No pending cards")
             } else {
                 Divider()
 
@@ -67,13 +67,13 @@ struct MenuBarContentView: View {
             }
         }) {
             if let updated = appState.lastUpdated {
-                Text("↻ Check Now (\(timeAgo(updated)))")
+                Text("Check Now (Updated \(timeAgo(updated)))")
             } else {
-                Text("↻ Check Now")
+                Text("Check Now")
             }
         }
 
-        Button("⚙️ Settings...") {
+        Button("Settings...") {
             SettingsWindowController.shared.showSettings(appState: appState)
         }
 
@@ -87,25 +87,21 @@ struct MenuBarContentView: View {
     private func formatCardMenuItem(_ card: TrelloCard) -> String {
         var prefix = ""
         switch card.dueStatus {
-        case .overdue: prefix = "🔴 "
-        case .dueToday: prefix = "🟠 "
-        case .dueTomorrow: prefix = "🟡 "
-        default: prefix = "⚪️ "
+        case .overdue:
+            prefix = "[Overdue] "
+        case .dueToday:
+            prefix = "[Due Today] "
+        case .dueTomorrow:
+            prefix = "[Tomorrow] "
+        default:
+            prefix = ""
         }
 
         var suffix = ""
-        if let dueDate = card.dueDate {
+        if let dueDate = card.dueDate, card.dueStatus != .dueToday && card.dueStatus != .dueTomorrow && card.dueStatus != .overdue {
             let formatter = DateFormatter()
-            if Calendar.current.isDateInToday(dueDate) {
-                suffix = " (Due Today)"
-            } else if Calendar.current.isDateInTomorrow(dueDate) {
-                suffix = " (Tomorrow)"
-            } else if dueDate < Date() {
-                suffix = " (Overdue)"
-            } else {
-                formatter.dateFormat = "MMM d"
-                suffix = " (\(formatter.string(from: dueDate)))"
-            }
+            formatter.dateFormat = "MMM d"
+            suffix = " (\(formatter.string(from: dueDate)))"
         }
 
         let board = card.board?.name != nil ? " [\(card.board!.name!)]" : ""

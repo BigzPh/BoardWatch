@@ -1,67 +1,41 @@
-# BoardWatch for Trello 📋
+# BoardWatch for Trello
 
-A native, lightweight macOS Menu Bar app built in SwiftUI that lets you monitor, track, and customize what Trello cards you watch directly from your Mac's top menu bar.
+A native, lightweight macOS Menu Bar app built in SwiftUI that tracks pending Trello cards with a glanceable count, native dropdown access, and system notifications.
 
 ---
 
 ## Features
 
-* **Lives in your macOS Menu Bar:** Configured with `LSUIElement` so it runs quietly in the top menu bar without cluttering your Dock.
-* **Custom Card Tracking (Pin 📌):** 
-  * Pin specific cards from any board or list to keep them tracked in your personal **Tracked** view.
-  * Filter cards across 3 views: **Tracked** (pinned cards), **Assigned** (assigned to you), and **All**.
-* **Board & Project Filtering:** Select specific Trello boards to monitor in **Settings** (or leave unselected to monitor all boards).
-* **Live Menu Bar Badge:**
-  * Customize what the menu bar counter displays: **Tracked Cards Count**, **All Assigned Incomplete**, **Due Soon / Overdue**, or **Icon Only**.
-* **Due Date & Checklist Indicators:**
-  * Color-coded due dates (Red for Overdue, Orange for Due Today, Yellow for Tomorrow).
-  * Checklist progress (e.g., `☑ 3/5`).
-  * Colored label dots matching your Trello board labels.
-* **Quick Actions:**
-  * Check/uncheck to toggle card completion status directly in Trello via the API.
-  * One-click button to open any card directly in your browser.
-  * Search bar to instantly filter cards by name, label, or board.
-* **Auto-Refresh:** Configurable background refresh timer (1m, 5m, 15m, 30m) or instant manual refresh.
+* **Menu Bar Agent:** Configured with `LSUIElement` to run strictly in the menu bar without appearing in the Dock.
+* **Glanceable Status:** Displays an icon and the number of pending tasks directly in the top menu bar.
+* **Native Menu Dropdown:** Clicking the menu bar item opens a standard native macOS menu listing cards with due dates and board names. Clicking any card opens it in your browser.
+* **Desktop Notifications:** Sends macOS notifications when new cards are assigned or when tasks are due.
+* **Configurable Polling:** Automatic background refresh interval (1m, 5m, 15m, 30m) or manual check.
 
 ---
 
-## Quick Start
+## Getting Started
 
-### 1. Launch the App
-The app has already been compiled and packaged:
+### 1. Launch the Application
 ```bash
 open BoardWatch.app
 ```
 
 ### 2. Connect Your Trello Account
-When you first open the app, it will display the **Settings** panel:
-1. Click the link to **[trello.com/app-key](https://trello.com/app-key)**.
-2. Copy your **API Key**.
-3. Under the *Token* section on the same page, click **Token** to generate an authorized token and copy it.
-4. Paste both into the app and click **Save & Connect**.
+1. Open **Settings...** from the menu bar dropdown.
+2. Open the link to [trello.com/app-key](https://trello.com/app-key).
+3. Copy your **API Key** and generate a **Personal Token**.
+4. Paste both into the settings dialog and click **Save & Connect**.
 
 ---
 
-## Customizing What Cards to Track
+## Building from Source
 
-### Method 1: Pinning Specific Cards (📌)
-* In the **Assigned** or **All** tab, hover over any card and click the **📌 pin icon**.
-* The card will now always appear under your **Tracked** tab.
-* In Settings, set your Menu Bar Badge to **Tracked Cards Count** so the menu bar icon only shows the count of your hand-picked cards!
-
-### Method 2: Filtering by Board
-* Open **Settings** (gear icon in the top right).
-* Under **Boards to Track**, check only the projects or boards you care about. All other boards will be filtered out.
-
----
-
-## Development & Rebuilding
-
-* **Rebuild & Package:**
+* **Compile and Package:**
   ```bash
   ./scripts/build_app.sh
   ```
-* **Rebuild & Launch Immediately:**
+* **Build and Run:**
   ```bash
   ./scripts/build_app.sh --run
   ```
