@@ -1,6 +1,13 @@
 import Foundation
 import SwiftUI
 
+public struct CardBoardGroup: Identifiable {
+    public var id: String { "\(workspaceName) • \(boardName)" }
+    public let workspaceName: String
+    public let boardName: String
+    public let cards: [TrelloCard]
+}
+
 @MainActor
 @Observable
 public final class AppState {
@@ -44,6 +51,21 @@ public final class AppState {
             }
     }
 
+    public var groupedPendingCards: [CardBoardGroup] {
+        let groups = Dictionary(grouping: pendingCards) { card in
+            "\(card.workspaceName ?? "Personal") • \(card.boardName ?? "Board")"
+        }
+
+        return groups.map { _, cards in
+            let first = cards.first
+            return CardBoardGroup(
+                workspaceName: first?.workspaceName ?? "Personal",
+                boardName: first?.boardName ?? "Board",
+                cards: cards
+            )
+        }.sorted { $0.id < $1.id }
+    }
+
     public var urgentCardsCount: Int {
         pendingCards.filter { $0.dueStatus == .overdue || $0.dueStatus == .dueToday }.count
     }
@@ -75,14 +97,29 @@ public final class AppState {
             let token = settings.token.trimmingCharacters(in: .whitespacesAndNewlines)
 
             async let userFetch = apiService.verifyCredentials(apiKey: key, token: token)
+            async let orgsFetch = apiService.fetchOrganizations(apiKey: key, token: token)
             async let boardsFetch = apiService.fetchBoards(apiKey: key, token: token)
             async let cardsFetch = apiService.fetchAssignedCards(apiKey: key, token: token)
 
-            let (user, boards, assignedCards) = try await (userFetch, boardsFetch, cardsFetch)
+            let (user, orgs, boards, assignedCards) = try await (userFetch, orgsFetch, boardsFetch, cardsFetch)
             self.currentUser = user
             self.boards = boards
 
-            // Check if there are pinned cards not in assigned cards
+            // Build lookup dictionaries
+            let orgMap = Dictionary(uniqueKeysWithValues: orgs.map { ($0.id, $0.displayName) })
+            var boardMap: [String: TrelloBoard] = [:]
+            var listMap: [String: String] = [:]
+
+            for board in boards {
+                boardMap[board.id] = board
+                if let lists = board.lists {
+                    for list in lists {
+                        listMap[list.id] = list.name
+                    }
+                }
+            }
+
+            // Enrich all cards with Workspace, Board, and List names
             var allCards = assignedCards
             let assignedCardIDs = Set(assignedCards.map { $0.id })
             let missingTrackedIDs = settings.trackedCardIDs.subtracting(assignedCardIDs)
@@ -91,6 +128,20 @@ public final class AppState {
                 if let singleCard = try? await apiService.fetchCard(cardId: missingId, apiKey: key, token: token) {
                     allCards.append(singleCard)
                 }
+            }
+
+            for i in allCards.indices {
+                let boardId = allCards[i].idBoard ?? ""
+                let listId = allCards[i].idList ?? ""
+                let board = boardMap[boardId]
+
+                allCards[i].boardName = board?.name ?? "Board"
+                if let orgId = board?.idOrganization, let orgName = orgMap[orgId] {
+                    allCards[i].workspaceName = orgName
+                } else {
+                    allCards[i].workspaceName = "Personal"
+                }
+                allCards[i].listName = listMap[listId] ?? "List"
             }
 
             self.cards = allCards

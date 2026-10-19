@@ -68,13 +68,45 @@ public actor TrelloAPIService {
         }
     }
 
+    public func fetchOrganizations(apiKey: String, token: String) async throws -> [TrelloOrganization] {
+        let endpoint = "\(baseURL)/members/me/organizations"
+        let queryItems = [
+            URLQueryItem(name: "key", value: apiKey),
+            URLQueryItem(name: "token", value: token),
+            URLQueryItem(name: "fields", value: "id,displayName")
+        ]
+
+        guard var components = URLComponents(string: endpoint) else {
+            throw TrelloAPIError.invalidURL
+        }
+        components.queryItems = queryItems
+
+        guard let url = components.url else {
+            throw TrelloAPIError.invalidURL
+        }
+
+        let (data, response) = try await session.data(from: url)
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            throw TrelloAPIError.invalidResponse((response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            return try decoder.decode([TrelloOrganization].self, from: data)
+        } catch {
+            throw TrelloAPIError.decodingError(error)
+        }
+    }
+
     public func fetchBoards(apiKey: String, token: String) async throws -> [TrelloBoard] {
         let endpoint = "\(baseURL)/members/me/boards"
         let queryItems = [
             URLQueryItem(name: "key", value: apiKey),
             URLQueryItem(name: "token", value: token),
             URLQueryItem(name: "filter", value: "open"),
-            URLQueryItem(name: "fields", value: "id,name,closed")
+            URLQueryItem(name: "fields", value: "id,name,idOrganization,closed"),
+            URLQueryItem(name: "lists", value: "open"),
+            URLQueryItem(name: "list_fields", value: "id,name")
         ]
 
         guard var components = URLComponents(string: endpoint) else {
@@ -110,11 +142,7 @@ public actor TrelloAPIService {
             URLQueryItem(name: "key", value: apiKey),
             URLQueryItem(name: "token", value: token),
             URLQueryItem(name: "filter", value: "all"),
-            URLQueryItem(name: "fields", value: "id,name,desc,due,dueComplete,url,idBoard,idList,labels,badges,idMembers"),
-            URLQueryItem(name: "board", value: "true"),
-            URLQueryItem(name: "board_fields", value: "id,name"),
-            URLQueryItem(name: "list", value: "true"),
-            URLQueryItem(name: "list_fields", value: "id,name")
+            URLQueryItem(name: "fields", value: "id,name,desc,due,dueComplete,url,idBoard,idList,labels,badges,idMembers")
         ]
 
         guard var components = URLComponents(string: endpoint) else {
@@ -148,11 +176,7 @@ public actor TrelloAPIService {
         let queryItems = [
             URLQueryItem(name: "key", value: apiKey),
             URLQueryItem(name: "token", value: token),
-            URLQueryItem(name: "fields", value: "id,name,desc,due,dueComplete,url,idBoard,idList,labels,badges,idMembers"),
-            URLQueryItem(name: "board", value: "true"),
-            URLQueryItem(name: "board_fields", value: "id,name"),
-            URLQueryItem(name: "list", value: "true"),
-            URLQueryItem(name: "list_fields", value: "id,name")
+            URLQueryItem(name: "fields", value: "id,name,desc,due,dueComplete,url,idBoard,idList,labels,badges,idMembers")
         ]
 
         guard var components = URLComponents(string: endpoint) else {

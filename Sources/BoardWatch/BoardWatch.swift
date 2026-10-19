@@ -35,25 +35,25 @@ struct MenuBarContentView: View {
                 Text("Assigned to @\(user.username)")
             }
 
-            let pending = appState.pendingCards
+            let groups = appState.groupedPendingCards
 
-            if pending.isEmpty {
+            if groups.isEmpty {
                 Text("No pending cards")
             } else {
                 Divider()
 
-                ForEach(pending.prefix(15)) { card in
-                    Button(action: {
-                        if let urlString = card.url, let url = URL(string: urlString) {
-                            NSWorkspace.shared.open(url)
+                ForEach(groups) { group in
+                    Section("\(group.workspaceName) › \(group.boardName)") {
+                        ForEach(group.cards) { card in
+                            Button(action: {
+                                if let urlString = card.url, let url = URL(string: urlString) {
+                                    NSWorkspace.shared.open(url)
+                                }
+                            }) {
+                                Text(formatCardMenuItem(card))
+                            }
                         }
-                    }) {
-                        Text(formatCardMenuItem(card))
                     }
-                }
-
-                if pending.count > 15 {
-                    Text("... and \(pending.count - 15) more")
                 }
             }
 
@@ -101,11 +101,11 @@ struct MenuBarContentView: View {
         if let dueDate = card.dueDate, card.dueStatus != .dueToday && card.dueStatus != .dueTomorrow && card.dueStatus != .overdue {
             let formatter = DateFormatter()
             formatter.dateFormat = "MMM d"
-            suffix = " (\(formatter.string(from: dueDate)))"
+            suffix = " (Due \(formatter.string(from: dueDate)))"
         }
 
-        let board = card.board?.name != nil ? " [\(card.board!.name!)]" : ""
-        return "\(prefix)\(card.name)\(board)\(suffix)"
+        let listTag = card.listName != nil ? " • \(card.listName!)" : ""
+        return "\(prefix)\(card.name)\(listTag)\(suffix)"
     }
 
     private func timeAgo(_ date: Date) -> String {

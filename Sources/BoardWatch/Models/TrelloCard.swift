@@ -16,6 +16,11 @@ public struct TrelloCard: Identifiable, Codable, Sendable {
     public let badges: TrelloBadges?
     public let idMembers: [String]?
 
+    // Enriched metadata
+    public var workspaceName: String?
+    public var boardName: String?
+    public var listName: String?
+
     public struct NamedEntity: Codable, Sendable {
         public let id: String?
         public let name: String?
