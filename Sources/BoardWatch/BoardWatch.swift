@@ -3,10 +3,10 @@ import AppKit
 
 extension NSImage {
     static var redStatusDot: NSImage {
-        let size = NSSize(width: 9, height: 9)
+        let size = NSSize(width: 7, height: 7)
         let img = NSImage(size: size, flipped: false) { _ in
             NSColor.systemRed.setFill()
-            let path = NSBezierPath(ovalIn: NSRect(x: 1, y: 1, width: 7, height: 7))
+            let path = NSBezierPath(ovalIn: NSRect(x: 0, y: 0, width: 7, height: 7))
             path.fill()
             return true
         }
@@ -23,12 +23,16 @@ struct BoardWatchApp: App {
         MenuBarExtra {
             MenuBarContentView(appState: appState)
         } label: {
-            HStack(spacing: 4) {
-                if appState.hasNewTasks {
-                    Image(nsImage: .redStatusDot)
-                }
+            HStack(spacing: 3) {
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: appState.statusIconName)
+                        .font(.system(size: 14))
 
-                Image(systemName: appState.statusIconName)
+                    if appState.hasNewTasks {
+                        Image(nsImage: .redStatusDot)
+                            .offset(x: 4, y: -3)
+                    }
+                }
 
                 if let badgeText = appState.menuBarBadgeText {
                     Text(badgeText)
